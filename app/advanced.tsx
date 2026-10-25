@@ -33,7 +33,7 @@ const glossary:[string,string][]=[
  ["Total cost of ownership","Acquisition cost plus other relevant costs incurred across the useful life of an item or service."],
  ["Supplier performance","The extent to which a supplier meets agreed commitments for quality, timeliness, service and other measures."]
 ];
-const process=[
+const procurementSteps=[
  ["Recognize need","Requesting department","Business requirement and budget context","Statement of need"],
  ["Define specification","Requester with procurement","Scope, quality standards and schedule","Comparable requirement"],
  ["Research market","Procurement","Supplier market information","Potential qualified sources"],
@@ -71,7 +71,7 @@ export default function Advanced(){
  return <>
  <section id="process" className="bg-white py-20"><div className="mx-auto max-w-7xl px-5 md:px-8">
   <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Who does what and when</p><h2 className="mt-3 text-3xl font-bold md:text-4xl">Process responsibilities & outputs</h2><p className="mt-4 max-w-3xl leading-7 text-slate-600">An illustrative end-to-end workflow. The steps are not always sequential; certain categories, emergency purchases or organizational policies will require different controls.</p>
-  <div className="mt-7 overflow-x-auto rounded-2xl border border-slate-200"><table className="w-full min-w-[780px] text-left text-sm"><thead className="bg-navy text-white"><tr>{["Activity","Typical owner","Key input","Expected output"].map(h=><th className="p-4" key={h}>{h}</th>)}</tr></thead><tbody>{process.map((r,i)=><tr key={r[0]} className={i%2===0?"bg-white":"bg-slate-50"}>{r.map(x=><td className="border-t border-slate-100 p-4 align-top" key={x}>{x}</td>)}</tr>)}</tbody></table></div>
+  <div className="mt-7 overflow-x-auto rounded-2xl border border-slate-200"><table className="w-full min-w-[780px] text-left text-sm"><thead className="bg-navy text-white"><tr>{["Activity","Typical owner","Key input","Expected output"].map(h=><th className="p-4" key={h}>{h}</th>)}</tr></thead><tbody>{procurementSteps.map((r,i)=><tr key={r[0]} className={i%2===0?"bg-white":"bg-slate-50"}>{r.map(x=><td className="border-t border-slate-100 p-4 align-top" key={x}>{x}</td>)}</tr>)}</tbody></table></div>
   <div className="mt-6 grid gap-4 md:grid-cols-2"><article className="rounded-2xl bg-amber-50 p-6"><h3 className="flex items-center gap-2 font-bold"><AlertTriangle size={20}/> Exception: delivery failure</h3><p className="mt-3 text-sm leading-7 text-slate-700">Identify the revised delivery date, business impact, contractual terms and available alternatives. Escalate material trade-offs to the right decision-makers.</p></article><article className="rounded-2xl bg-emerald-50 p-6"><h3 className="flex items-center gap-2 font-bold"><Users size={20}/> Control: separation of duties</h3><p className="mt-3 text-sm leading-7 text-slate-700">An organization may separate requesting, approval, receiving and payment responsibilities to reduce error, conflict and misuse.</p></article></div>
  </div></section>
  <section id="stories" className="mx-auto max-w-7xl px-5 py-20 md:px-8">
