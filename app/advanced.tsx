@@ -1,0 +1,114 @@
+'use client';
+import {useEffect,useState} from "react";
+import {BookOpen,CheckCircle2,Download,FileText,RotateCcw,Users,AlertTriangle,ArrowRight} from "lucide-react";
+
+type Question={prompt:string;choices:[string,string,string,string];correct:number;reason:string};
+const questions:Question[]=[
+ {prompt:"What is the main purpose of procurement?",choices:["Support business needs using external supply","Always select the lowest price","Only issue purchase orders","Only pay invoices"],correct:0,reason:"Procurement works across requirements, market engagement, purchasing and supplier outcomes while balancing value, risk, quality and continuity."},
+ {prompt:"A requirement is unclear. What is the best first action?",choices:["Issue the order","Clarify scope, quantity, quality and date","Ask finance to pay","Choose the incumbent supplier"],correct:1,reason:"A defined requirement reduces waste and makes different supplier bids comparable."},
+ {prompt:"Which purchase is direct procurement for a bicycle manufacturer?",choices:["Tires fitted to bicycles","Office cleaning","Legal services","Reception furniture"],correct:0,reason:"Production tires become part of the finished bicycles."},
+ {prompt:"Which is an example of indirect procurement?",choices:["Steel for a finished machine","Motor installed in a finished product","Facility cleaning services","Packaging sold with a product"],correct:2,reason:"Facility cleaning supports business operations but does not become part of the product."},
+ {prompt:"What is sourcing?",choices:["Identifying and assessing supply options","Recording invoices","Receiving parcels","Paying suppliers"],correct:0,reason:"Sourcing includes researching supply markets, identifying suppliers, inviting offers and assessing alternatives."},
+ {prompt:"What does RFQ commonly stand for?",choices:["Request for Quality","Request for Quotation","Receipt for Quantity","Review for Qualification"],correct:1,reason:"An RFQ seeks price and terms for a sufficiently specified requirement."},
+ {prompt:"What is the best measure of cost when comparing supplier offers?",choices:["Unit price only","Total delivered cost and relevant ownership costs","Previous year's budget","Number of suppliers contacted"],correct:1,reason:"Freight, duties, handling, operating costs and risks can change which offer provides better value."},
+ {prompt:"A supplier promises a fast delivery but has an unverified quality record. What should the buyer do?",choices:["Ignore quality","Check evidence and qualify the risk","Assume the supplier is approved","Pay the supplier immediately"],correct:1,reason:"An attractive lead time cannot substitute for fit-for-purpose quality and supplier due diligence."},
+ {prompt:"Which event normally follows delivery of purchased goods?",choices:["Validate receipt against the order","Restart market research automatically","Cancel the agreement","Negotiate before the need is defined"],correct:0,reason:"Receiving confirms quantities and condition and helps support invoice reconciliation."},
+ {prompt:"What does a three-way match commonly compare?",choices:["Request, quote and budget","Order, receipt and invoice","Forecast, inventory and shipment","Contract, catalog and meeting notes"],correct:1,reason:"A three-way match checks purchase-order, goods-receipt and invoice details before payment, subject to policy."},
+ {prompt:"Who should participate when a supplier delay threatens operations?",choices:["Procurement alone","Operations and other relevant stakeholders","Only marketing","Nobody until the invoice arrives"],correct:1,reason:"Procurement should quantify impacts and collaborate with the requestor and relevant decision-makers on alternatives."},
+ {prompt:"A business buys the same material every month. Which approach may improve consistency?",choices:["Use uncontrolled purchases","Establish an appropriate sourcing and contracting strategy","Ignore prior purchase history","Eliminate specifications"],correct:1,reason:"Recurring demand can justify a defined supplier strategy and agreement, subject to category and policy."},
+ {prompt:"Which is an example of supplier performance management?",choices:["Tracking on-time delivery and defects","Approving all bids based on brand","Ignoring failed deliveries","Removing all supplier communication"],correct:0,reason:"Performance measures connect promised outcomes to actual supplier results."},
+ {prompt:"For 300 helmets at $19 each plus $300 freight, what is the delivered cost?",choices:["$5,700","$6,000","$6,300","$5,400"],correct:1,reason:"300 × $19 = $5,700; adding $300 freight gives $6,000, excluding any other undisclosed charges."},
+ {prompt:"A quotation is lowest cost but does not meet a mandatory deadline. How should it be treated?",choices:["Automatically award","Investigate expediting or evaluate feasible alternatives","Ignore the date","Send payment before approval"],correct:1,reason:"Meeting mandatory operational requirements can outweigh unit-price savings. Expediting must be verified."},
+ {prompt:"Why should procurement review outcomes after delivery?",choices:["To improve future buying decisions","To eliminate the need for specifications","To prevent future market analysis","To guarantee all suppliers are identical"],correct:0,reason:"Evaluating performance helps improve supplier choices, controls and continuity over time."}
+];
+const glossary:[string,string][]=[
+ ["Procurement","The coordinated process of obtaining external goods and services to support business outcomes."],
+ ["Sourcing","Exploring supply markets, identifying qualified suppliers, and evaluating offers."],
+ ["Purchasing","The operational act of ordering goods or services and supporting fulfillment."],
+ ["Stakeholder","A person or function affected by or contributing to a procurement decision."],
+ ["RFQ","Request for Quotation: a request for commercial offers against defined specifications."],
+ ["RFP","Request for Proposal: asks suppliers to describe a proposed solution and commercial approach."],
+ ["Purchase order","A commercial document that communicates the agreed order requirements and terms."],
+ ["Lead time","The elapsed time from an agreed starting point, such as order acceptance, to delivery."],
+ ["Total cost of ownership","Acquisition cost plus other relevant costs incurred across the useful life of an item or service."],
+ ["Supplier performance","The extent to which a supplier meets agreed commitments for quality, timeliness, service and other measures."]
+];
+const process=[
+ ["Recognize need","Requesting department","Business requirement and budget context","Statement of need"],
+ ["Define specification","Requester with procurement","Scope, quality standards and schedule","Comparable requirement"],
+ ["Research market","Procurement","Supplier market information","Potential qualified sources"],
+ ["Invite & compare offers","Procurement and stakeholders","RFQ/RFP and evaluation criteria","Evaluation and recommendation"],
+ ["Approve supplier","Authorized decision-makers","Due diligence and recommendation","Approved award decision"],
+ ["Contract & order","Procurement, legal where relevant","Terms, quantities and prices","Agreement or purchase order"],
+ ["Receive & validate","Receiving team and requester","Delivery and acceptance evidence","Receipt or service confirmation"],
+ ["Reconcile & pay","Finance / accounts payable","Order, receipt and invoice","Validated payment"],
+ ["Review performance","Procurement and business owners","Delivery and quality results","Improvement actions"]
+];
+const stories=[
+ {title:"Healthcare: urgent protective equipment",who:"Hospital purchasing officer",problem:"A care team must obtain protective supplies quickly without compromising clinical specifications.",decision:"Confirm critical specifications, seek qualified options, compare delivery assurance, and document any emergency purchasing approvals.",lesson:"Urgency changes the process priority, not the need for safety and transparent decisions."},
+ {title:"Retail: seasonal product replenishment",who:"Merchandising and purchasing team",problem:"A retailer expects seasonal demand but faces long overseas lead times.",decision:"Review demand uncertainty, supplier capacity, order timing and total landed cost before placing commitments.",lesson:"Inventory risk and sales timing matter as much as supplier price."},
+ {title:"Manufacturing: maintenance service",who:"Plant manager and procurement analyst",problem:"A production line needs preventive maintenance during a scheduled shutdown.",decision:"Define service scope, safety requirements, response time, technician qualifications and acceptance criteria.",lesson:"Buying a service requires clear outcomes and evidence of completion, not only a product specification."}
+];
+export default function Advanced(){
+ const [story,setStory]=useState<number|null>(null);
+ const [supplier,setSupplier]=useState("");
+ const [risk,setRisk]=useState("");
+ const [search,setSearch]=useState("");
+ const [responses,setResponses]=useState<Record<number,number>>({});
+ const [submitted,setSubmitted]=useState(false);
+ const [attempt,setAttempt]=useState(1);
+ const [mastery,setMastery]=useState(false);
+ useEffect(()=>{try{setMastery(localStorage.getItem("procurement-lesson-01-mastery")==="pass")}catch{}},[]);
+ const score=questions.filter((q,i)=>responses[i]===q.correct).length;
+ const ready=Object.keys(responses).length===questions.length;
+ function submit(){if(!ready||submitted)return;setSubmitted(true);if(score>=13){setMastery(true);try{localStorage.setItem("procurement-lesson-01-mastery","pass")}catch{}}}
+ function reset(){setResponses({});setSubmitted(false);setAttempt(v=>v+1)}
+ function exportWork(){
+  const lines=["THE PROCUREMENT ATLAS — LESSON 01 CAPSTONE","Fictional learning exercise","","Stonebridge Manufacturing: 300 helmets needed within 21 days","Alpha: $5,550 / 28 days","Beta: $6,300 / 14 days","Gamma: $6,000 / 20 days","Supplier selected: "+(supplier||"Not selected"),"Disruption response: "+(risk||"Not selected"),"Assessment attempt: "+attempt,"Assessment score: "+(submitted?score+"/16":"Not yet submitted"),"","Evaluation reminder: confirm quality, supplier capacity, payment terms and delivery reliability before award."];
+  const blob=new Blob([lines.join("\n")],{type:"text/plain;charset=utf-8"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="stonebridge-capstone-lesson01.txt";a.click();URL.revokeObjectURL(url);
+ }
+ return <>
+ <section id="process" className="bg-white py-20"><div className="mx-auto max-w-7xl px-5 md:px-8">
+  <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Who does what and when</p><h2 className="mt-3 text-3xl font-bold md:text-4xl">Process responsibilities & outputs</h2><p className="mt-4 max-w-3xl leading-7 text-slate-600">An illustrative end-to-end workflow. The steps are not always sequential; certain categories, emergency purchases or organizational policies will require different controls.</p>
+  <div className="mt-7 overflow-x-auto rounded-2xl border border-slate-200"><table className="w-full min-w-[780px] text-left text-sm"><thead className="bg-navy text-white"><tr>{["Activity","Typical owner","Key input","Expected output"].map(h=><th className="p-4" key={h}>{h}</th>)}</tr></thead><tbody>{process.map((r,i)=><tr key={r[0]} className={i%2===0?"bg-white":"bg-slate-50"}>{r.map(x=><td className="border-t border-slate-100 p-4 align-top" key={x}>{x}</td>)}</tr>)}</tbody></table></div>
+  <div className="mt-6 grid gap-4 md:grid-cols-2"><article className="rounded-2xl bg-amber-50 p-6"><h3 className="flex items-center gap-2 font-bold"><AlertTriangle size={20}/> Exception: delivery failure</h3><p className="mt-3 text-sm leading-7 text-slate-700">Identify the revised delivery date, business impact, contractual terms and available alternatives. Escalate material trade-offs to the right decision-makers.</p></article><article className="rounded-2xl bg-emerald-50 p-6"><h3 className="flex items-center gap-2 font-bold"><Users size={20}/> Control: separation of duties</h3><p className="mt-3 text-sm leading-7 text-slate-700">An organization may separate requesting, approval, receiving and payment responsibilities to reduce error, conflict and misuse.</p></article></div>
+ </div></section>
+ <section id="stories" className="mx-auto max-w-7xl px-5 py-20 md:px-8">
+  <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Business storytelling</p><h2 className="mt-3 text-3xl font-bold">Procurement is different in every setting</h2><p className="mt-3 text-slate-600">Explore three realistic but fictional business situations.</p>
+  <div className="mt-8 grid gap-5 md:grid-cols-3">{stories.map((s,i)=><article key={s.title} className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6"><p className="text-xs font-bold uppercase tracking-widest text-emerald-700">{s.who}</p><h3 className="mt-3 text-xl font-bold">{s.title}</h3><p className="mt-4 flex-1 text-sm leading-7 text-slate-600">{s.problem}</p><button type="button" onClick={()=>setStory(story===i?null:i)} aria-expanded={story===i} className="mt-6 flex items-center gap-2 text-left text-sm font-bold text-emerald-800">{story===i?"Hide approach":"Reveal procurement approach"} <ArrowRight size={17}/></button>{story===i&&<div className="mt-4 border-t border-slate-200 pt-4 text-sm leading-7"><p>{s.decision}</p><p className="mt-3 font-semibold text-emerald-800">Key lesson: {s.lesson}</p></div>}</article>)}</div>
+ </section>
+ <section id="capstone" className="bg-emerald-50 py-20"><div className="mx-auto max-w-7xl px-5 md:px-8">
+  <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Continuous academy capstone · Part 1</p><h2 className="mt-3 text-3xl font-bold md:text-4xl">Stonebridge Manufacturing</h2>
+  <p className="mt-4 max-w-3xl leading-7 text-slate-700">You have just joined a fictional industrial manufacturer as a junior procurement analyst. The site needs 300 safety helmets within 21 days. Three suppliers meet the stated technical requirements. Which offer should you recommend, and what risks remain?</p>
+  <p className="mt-3 text-sm text-slate-600">Assume comparable quality, credit terms and technical compliance. All quantities, bids and company details are fictional for learning.</p>
+  <div className="mt-7 overflow-x-auto rounded-2xl border border-slate-200 bg-white"><table className="w-full min-w-[620px] text-left text-sm"><thead className="bg-navy text-white"><tr>{["Supplier","Unit price","Freight","Delivered cost","Delivery","Within 21 days?"].map(x=><th key={x} className="p-4">{x}</th>)}</tr></thead><tbody>{[["Alpha","$18","$150","$5,550","28 days","No"],["Beta","$21","$0","$6,300","14 days","Yes"],["Gamma","$19","$300","$6,000","20 days","Yes"]].map(r=><tr key={r[0]} className="border-t border-slate-100">{r.map(x=><td className="p-4" key={x}>{x}</td>)}</tr>)}</tbody></table></div>
+  <p className="mt-3 text-sm text-slate-600">Delivered cost = (unit price × quantity) + freight. Other undisclosed costs are assumed equal or excluded.</p>
+  <div className="mt-7 grid gap-5 lg:grid-cols-2">
+   <article className="rounded-2xl border border-slate-200 bg-white p-6"><h3 className="text-xl font-bold">Decision 1 — Select a supplier</h3><p className="mt-2 text-sm leading-7 text-slate-600">Consider the total delivered cost, stated deadline and schedule buffer.</p><fieldset className="mt-4"><legend className="sr-only">Supplier recommendation</legend>{["Alpha","Beta","Gamma"].map(s=><label key={s} className="mt-3 flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3"><input type="radio" name="supplier" value={s} checked={supplier===s} onChange={()=>setSupplier(s)}/>{s}</label>)}</fieldset>
+    {supplier&&<div role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7"><strong>{supplier==="Gamma"?"Lowest-cost feasible option.":supplier==="Beta"?"Feasible with more delivery buffer.":"Misses the deadline."}</strong> {supplier==="Gamma"?"Gamma meets the 21-day deadline for $6,000, leaving one day of buffer. Investigate on-time delivery reliability before award.":supplier==="Beta"?"Beta meets the requirement for $6,300 with seven days of buffer, but costs $300 more than Gamma. It may be preferred when the additional schedule protection justifies the premium.":"Alpha costs $5,550, but its 28-day lead time exceeds the deadline by seven days. Explore expedited options or rule it out."}</div>}
+   </article>
+   <article className="rounded-2xl border border-slate-200 bg-white p-6"><h3 className="text-xl font-bold">Decision 2 — Handle disruption</h3><p className="mt-2 text-sm leading-7 text-slate-600">Gamma warns that its delivery may slip five days. What would you do first?</p><fieldset className="mt-4"><legend className="sr-only">Disruption response</legend>{[["accept","Accept the delay without consulting operations"],["assess","Confirm impact, involve operations and assess alternatives"],["pay","Pay the full amount immediately to encourage delivery"]].map(([v,t])=><label key={v} className="mt-3 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 text-sm"><input type="radio" name="risk" checked={risk===v} onChange={()=>setRisk(v)}/>{t}</label>)}</fieldset>
+    {risk&&<div role="status" className="mt-4 rounded-xl bg-amber-50 p-4 text-sm leading-7">{risk==="assess"?"Strong response. Verify the new delivery commitment, estimate consequences and evaluate feasible contingency options before deciding.":"Consider the operational effects and your organization's approval controls. A unilateral response may increase cost or fail to resolve the delivery risk."}</div>}
+   </article>
+  </div>
+  <div className="mt-6 flex flex-wrap items-center gap-5 rounded-2xl bg-navy p-6 text-white"><div className="flex-1"><h3 className="font-bold">Capstone workbook</h3><p className="mt-1 text-sm text-slate-200">Save your recommendation, risk response, comparative costs and assessment results.</p></div><button type="button" onClick={exportWork} className="inline-flex items-center gap-2 rounded-xl bg-mint px-5 py-3 font-bold text-navy"><Download size={18}/> Export work</button></div>
+ </div></section>
+ <section id="glossary" className="bg-white py-20"><div className="mx-auto max-w-7xl px-5 md:px-8">
+  <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Reference library</p><h2 className="mt-3 text-3xl font-bold">Procurement glossary</h2></div><input type="search" aria-label="Search glossary" placeholder="Search a term..." className="rounded-xl border border-slate-300 p-3" value={search} onChange={e=>setSearch(e.target.value)}/></div>
+  <div className="mt-7 grid gap-3 md:grid-cols-2">{glossary.filter(([a,b])=>(a+" "+b).toLowerCase().includes(search.toLowerCase())).map(([a,b])=><div key={a} className="rounded-xl border border-slate-200 p-4"><strong>{a}</strong><p className="mt-2 text-sm leading-7 text-slate-600">{b}</p></div>)}</div>
+  {glossary.filter(([a,b])=>(a+" "+b).toLowerCase().includes(search.toLowerCase())).length===0&&<p className="mt-5 text-sm">No terms found. Try another search.</p>}
+ </div></section>
+ <section id="assessment" className="mx-auto max-w-4xl px-5 py-20 md:px-8">
+  <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Lesson mastery</p><h2 className="mt-3 text-3xl font-bold">16 questions. Real explanations.</h2><p className="mt-3 text-slate-600">Complete all questions and submit. The passing threshold is 13/16 (81.25%). You may retry. Mastery is saved only in your current browser.</p>
+  <div className="mt-8 space-y-5">{questions.map((q,i)=><article key={i} className="rounded-2xl border border-slate-200 bg-white p-6"><p className="text-xs font-bold uppercase tracking-widest text-emerald-700">Question {i+1} / {questions.length}</p><h3 className="mt-3 font-bold">{q.prompt}</h3><fieldset className="mt-4 space-y-2"><legend className="sr-only">Question {i+1} options</legend>{q.choices.map((o,j)=><label key={j} className={responses[i]===j?"flex cursor-pointer items-start gap-3 rounded-xl border border-emerald-500 bg-emerald-50 p-3 text-sm":"flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 text-sm"}><input type="radio" name={"question-"+i} checked={responses[i]===j} disabled={submitted} onChange={()=>setResponses(prev=>({...prev,[i]:j}))}/>{o}</label>)}</fieldset>
+    {submitted&&<p className={responses[i]===q.correct?"mt-4 rounded-xl bg-emerald-50 p-4 text-sm leading-7 text-emerald-900":"mt-4 rounded-xl bg-amber-50 p-4 text-sm leading-7 text-amber-900"}><strong>{responses[i]===q.correct?"Correct. ":"Review. "}</strong>{q.reason} <strong>Best answer:</strong> {q.choices[q.correct]}</p>}
+   </article>)}</div>
+  <div className="mt-7 rounded-2xl bg-navy p-6 text-white"><div className="flex flex-wrap items-center justify-between gap-4"><div><p className="font-bold">Attempt {attempt}</p><p className="mt-1 text-sm text-slate-200">{Object.keys(responses).length} / 16 answered</p></div><div className="flex flex-wrap gap-3">{submitted&&<button type="button" onClick={reset} className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-4 py-3 font-bold"><RotateCcw size={16}/> Retry</button>}<button type="button" disabled={!ready||submitted} onClick={submit} className="rounded-xl bg-mint px-5 py-3 font-bold text-navy disabled:cursor-not-allowed disabled:opacity-40">Submit assessment</button></div></div>
+   {submitted&&<div role="status" className="mt-5 border-t border-white/20 pt-5"><p className="text-3xl font-bold">{score} / 16 · {Math.round(score/16*100)}%</p><p className="mt-2">{score>=13?"Mastery achieved. Continue practising as needed.":"Below mastery threshold. Review explanations and retry."}</p></div>}
+   {mastery&&<p className="mt-4 flex items-center gap-2 text-sm text-mint"><CheckCircle2 size={17}/> Lesson 01 mastery recorded in this browser</p>}
+  </div>
+ </section>
+ <section className="mx-auto max-w-7xl px-5 pb-20 md:px-8"><article className="rounded-2xl border border-slate-200 bg-emerald-50 p-6"><h2 className="flex items-center gap-2 text-xl font-bold"><BookOpen size={24}/> Learning outcomes</h2><p className="mt-3 leading-7 text-slate-700">Describe procurement and the roles of sourcing and purchasing, explain the typical workflow and responsibilities, compare supplier total costs and delivery risks, and justify a recommendation to stakeholders.</p><p className="mt-3 text-sm text-slate-600"><FileText size={15} className="mr-1 inline"/> All company names, quotations and situations are illustrative. Practices and legal requirements vary by jurisdiction, category and company policy.</p></article></section>
+ </>;
+}
